@@ -24,10 +24,10 @@
 
     <div id="score">0</div>
     <canvas id="gameCanvas" width="400" height="500"></canvas>
-    <div id="message" class="message">Click to play "Oui" by Jeremih</div>
+    <div id="message" class="message">Click to play with Vibes</div>
 
     <audio id="bgMusic" loop>
-        <source src="soundtrack.mp3" type="audio/mpeg">
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
     </audio>
 
     <script>
@@ -46,6 +46,7 @@
         let pipes = [];
         let score = 0;
         let isPlaying = false;
+        let frameCount = 0;
 
         function draw() {
             // Background
@@ -66,17 +67,23 @@
                     ctx.fillRect(p.x, 0, 50, p.top); // Top Pipe
                     ctx.fillRect(p.x, p.top + PIPE_GAP, 50, canvas.height); // Bottom Pipe
 
-                    if (p.x === 50) { score++; document.getElementById('score').innerText = score; }
+                    // Score Logic
+                    if (Math.abs(p.x - 50) < PIPE_SPEED / 2) { 
+                        score++; 
+                        document.getElementById('score').innerText = score; 
+                    }
+                    
                     if (p.x < -50) pipes.splice(i, 1);
 
                     // Collision
-                    if (bird.x + 25 > p.x && bird.x < p.x + 50 && (bird.y < p.top || bird.y + 25 > p.top + PIPE_GAP)) reset();
+                    if (bird.x + 20 > p.x && bird.x < p.x + 50 && (bird.y < p.top || bird.y + 20 > p.top + PIPE_GAP)) reset();
                 });
 
                 if (bird.y > canvas.height || bird.y < 0) reset();
+                frameCount++;
             }
 
-            // Draw Bird (Simplified)
+            // Draw Bird
             ctx.fillStyle = "#FFC107";
             ctx.beginPath();
             ctx.arc(bird.x + 12, bird.y + 12, 12, 0, Math.PI * 2);
@@ -85,14 +92,12 @@
             requestAnimationFrame(draw);
         }
 
-        let frameCount = 0;
-        setInterval(() => { if (isPlaying) frameCount++; }, 10);
-
         function reset() {
             isPlaying = false;
             bird = { x: 50, y: 250, velocity: 0 };
             pipes = [];
             score = 0;
+            frameCount = 0;
             document.getElementById('score').innerText = score;
             messageDiv.style.display = "block";
             bgMusic.pause();
@@ -103,7 +108,7 @@
             if (!isPlaying) {
                 isPlaying = true;
                 messageDiv.style.display = "none";
-                bgMusic.play();
+                bgMusic.play().catch(e => console.log("Audio play blocked"));
             }
             bird.velocity = JUMP;
         });
